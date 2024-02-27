@@ -28,6 +28,7 @@ from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.distributed import init_process_group, destroy_process_group
 
 from model import GPTConfig, GPT
+from model_reimpl import GPTReimplementation
 
 # -----------------------------------------------------------------------------
 # default config values designed to train a gpt2 (124M) on OpenWebText
@@ -42,6 +43,7 @@ init_from = 'scratch' # 'scratch' or 'resume' or 'gpt2*'
 # wandb logging
 wandb_log = False # disabled by default
 wandb_project = 'owt'
+wandb_team = None
 wandb_run_name = 'gpt2' # 'run' + str(time.time())
 # data
 dataset = 'openwebtext'
@@ -151,7 +153,9 @@ if init_from == 'scratch':
         print("defaulting to vocab_size of GPT-2 to 50304 (50257 rounded up for efficiency)")
     model_args['vocab_size'] = meta_vocab_size if meta_vocab_size is not None else 50304
     gptconf = GPTConfig(**model_args)
-    model = GPT(gptconf)
+    # model = GPT(gptconf)
+    print("\n" * 5 + "Using reimplemented model" + "\n" * 5)
+    model = GPTReimplementation(gptconf)
 elif init_from == 'resume':
     print(f"Resuming training from {out_dir}")
     # resume training from a checkpoint.
@@ -241,7 +245,7 @@ def get_lr(it):
 # logging
 if wandb_log and master_process:
     import wandb
-    wandb.init(project=wandb_project, name=wandb_run_name, config=config)
+    wandb.init(project=wandb_project, name=wandb_run_name, entity=wandb_team, config=config)
 
 # training loop
 X, Y = get_batch('train') # fetch the very first batch

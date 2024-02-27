@@ -7,6 +7,7 @@ from contextlib import nullcontext
 import torch
 import tiktoken
 from model import GPTConfig, GPT
+from model_reimpl import GPTReimplementation
 
 # -----------------------------------------------------------------------------
 init_from = 'resume' # either 'resume' (from an out_dir) or a gpt2 variant (e.g. 'gpt2-xl')
@@ -37,7 +38,8 @@ if init_from == 'resume':
     ckpt_path = os.path.join(out_dir, 'ckpt.pt')
     checkpoint = torch.load(ckpt_path, map_location=device)
     gptconf = GPTConfig(**checkpoint['model_args'])
-    model = GPT(gptconf)
+    # model = GPT(gptconf)
+    model = GPTReimplementation(gptconf)
     state_dict = checkpoint['model']
     unwanted_prefix = '_orig_mod.'
     for k,v in list(state_dict.items()):

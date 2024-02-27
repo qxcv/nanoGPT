@@ -313,10 +313,9 @@ class GPTBlock(nn.Module):
         self.drop = Dropout(p=p_drop)
 
     def forward(self, x: th.Tensor) -> th.Tensor:
-        # TODO(sam): K/V cache
-        # attn_in = self.ln1(x)
-        # attn_result = self.attn(attn_in)
-        # x = x + self.drop(attn_result)
+        attn_in = self.ln1(x)
+        attn_result = self.attn(attn_in)
+        x = x + self.drop(attn_result)
         x = x + self.drop(self.mlp(self.ln2(x)))
         return x
 
@@ -481,3 +480,5 @@ class GPTReimplementation(nn.Module):
             idx_next = th.multinomial(probs, num_samples=1)
             # append sampled index to the running sequence and continue
             idx = th.cat((idx, idx_next), dim=1)
+
+        return idx
